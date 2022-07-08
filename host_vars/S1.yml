@@ -2,7 +2,10 @@ ansible_user: "harvey"
 ansible_password: "cisco"
 ansible_network_os: ios
 
+become_user: yes
+
 tasks: 
-  -name: access and hostname
+- name: access and hostname
   cisco.ios.ios_config:
-  lines: hostname 
+    lines: hostname {{ S1_hostname }}
+
