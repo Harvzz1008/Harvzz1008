@@ -1,2 +1,4 @@
-Switch_1 ansible_host=192.168.0.253
-Router_1 ansible_host=192.168.0.254
+[all]
+S1 ansible_host=192.168.0.253
+R1 ansible_host=192.168.0.2547
+
