@@ -2,3 +2,7 @@ ansible_user: "harvey"
 ansible_password: "cisco"
 ansible_network_os: ios
 
+tasks: 
+  -name: access and hostname
+  cisco.ios.ios_config:
+  lines: hostname 
