@@ -1,0 +1,85 @@
+import { db } from '@/lib/db'
+import { Ticket } from 'lucide-react'
+
+export default async function AdminTicketsPage() {
+  const tickets = await db.ticket.findMany({
+    include: {
+      event: true,
+      user: { select: { email: true, name: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  const statusColors: Record<string, string> = {
+    PENDING: 'bg-yellow-100 text-yellow-700',
+    PAID: 'bg-green-100 text-green-700',
+    CANCELLED: 'bg-red-100 text-red-700',
+  }
+
+  return (
+    <div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Tickets</h1>
+        <p className="text-gray-500 mt-1">{tickets.length} tickets total</p>
+      </div>
+
+      {tickets.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-gray-100 p-16 text-center">
+          <Ticket size={48} className="mx-auto mb-4 text-gray-300" />
+          <p className="text-xl font-medium text-gray-700">No tickets sold yet</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-100 text-left">
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600">Event</th>
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600">Customer</th>
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600">Qty</th>
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600">Total</th>
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600">Status</th>
+                <th className="px-6 py-4 text-sm font-semibold text-gray-600">Purchased</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {tickets.map((ticket) => (
+                <tr key={ticket.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4">
+                    <p className="font-medium text-gray-900">{ticket.event.name}</p>
+                    <p className="text-xs text-gray-400">
+                      {new Date(ticket.event.date).toLocaleDateString('en-GB')}
+                    </p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <p className="text-sm text-gray-900">
+                      {ticket.user?.name || ticket.guestName || 'Guest'}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {ticket.user?.email || ticket.guestEmail || '—'}
+                    </p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-sm text-gray-900">{ticket.quantity}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="font-bold text-gray-900">£{ticket.totalPrice.toFixed(2)}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${statusColors[ticket.status] || 'bg-gray-100 text-gray-600'}`}>
+                      {ticket.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="text-sm text-gray-500">
+                      {new Date(ticket.createdAt).toLocaleDateString('en-GB')}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
